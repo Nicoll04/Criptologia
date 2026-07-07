@@ -96,6 +96,36 @@ def main():
     secciones = []
 
     # -----------------------------------------------------------------
+    # Explicacion del proceso (antes de las tablas)
+    # -----------------------------------------------------------------
+    contenido = rh.card("""
+        <p><b>Esquema EDE (Encrypt-Decrypt-Encrypt)</b> con tres claves
+        independientes K1, K2, K3:</p>
+        <ul>
+            <li><b>Cifrar:</b> <code>E(K1, M) &rarr; D(K2, .) &rarr; E(K3, .)</code>.
+            Se cifra con K1, se "descifra" con K2 (esto no revierte nada real, solo
+            aplica otra capa distinta) y se vuelve a cifrar con K3.</li>
+            <li><b>Descifrar:</b> el proceso exactamente inverso:
+            <code>D(K3, C) &rarr; E(K2, .) &rarr; D(K1, .)</code>.</li>
+        </ul>
+        <p class="section-note">Usar tres claves distintas (en vez de una sola
+        clave DES aplicada 3 veces) es lo que le da a 3DES su seguridad extra
+        frente al DES simple: amplia efectivamente el espacio de claves.</p>
+    """) + rh.card("""
+        <p><b>Manejo de un mensaje de texto</b> (mas largo que un bloque de 64 bits):</p>
+        <ol>
+            <li><b>Relleno PKCS7:</b> si el mensaje no es multiplo de 8 bytes (64 bits),
+            se agregan bytes de relleno cuyo valor indica cuantos se agregaron, para
+            poder quitarlos exactamente al descifrar.</li>
+            <li><b>Particion en bloques:</b> el mensaje ya relleno se divide en bloques
+            de 8 bytes (64 bits).</li>
+            <li><b>Modo ECB:</b> cada bloque se cifra/descifra por separado con el
+            esquema EDE anterior, sin encadenarlo con el bloque anterior.</li>
+        </ol>
+    """)
+    secciones.append(rh.section("&iquest;Como funciona el algoritmo 3DES?", contenido))
+
+    # -----------------------------------------------------------------
     # Claves y mensaje
     # -----------------------------------------------------------------
     contenido = rh.card(f"""

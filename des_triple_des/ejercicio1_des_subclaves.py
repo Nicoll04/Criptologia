@@ -54,6 +54,60 @@ def main():
     secciones = []
 
     # -----------------------------------------------------------------
+    # Explicacion del proceso (antes de las tablas)
+    # -----------------------------------------------------------------
+    contenido = rh.card("""
+        <p><b>Tablas del estandar (IP, FP, E, P, PC-1, PC-2, S-cajas):</b>
+        son tablas fijas definidas por el estandar DES (FIPS 46-3), no se calculan.
+        Todas las permutaciones (IP, FP, E, P, PC-1, PC-2) son la misma operacion
+        generica: reordenar/seleccionar bits segun una tabla de indices.</p>
+    """) + rh.card("""
+        <p><b>Generacion de las 16 subclaves</b> (a partir de la clave K de 64 bits):</p>
+        <ol>
+            <li><b>PC-1:</b> la clave de 64 bits pasa por PC-1, que descarta los 8 bits
+            de paridad y deja 56 bits.</li>
+            <li>Esos 56 bits se parten en dos mitades de 28 bits: <code>C0</code> y
+            <code>D0</code>.</li>
+            <li>Por cada una de las 16 rondas: <code>C</code> y <code>D</code> se rotan
+            a la izquierda (1 o 2 bits, segun la tabla de desplazamientos) y la
+            concatenacion <code>C_i + D_i</code> pasa por <b>PC-2</b>, que selecciona
+            48 de esos 56 bits &rarr; esa es la subclave <code>K_i</code>.</li>
+        </ol>
+    """) + rh.card("""
+        <p><b>Funcion Feistel f(R, K)</b> &mdash; el corazon de cada ronda:</p>
+        <ol>
+            <li><b>Expansion (E):</b> la mitad derecha (32 bits) se expande a 48 bits
+            repitiendo algunos bits.</li>
+            <li><b>XOR con la subclave:</b> los 48 bits expandidos se mezclan (XOR)
+            con la subclave de esa ronda.</li>
+            <li><b>S-cajas:</b> los 48 bits se dividen en 8 grupos de 6 bits. En cada
+            grupo, el primer y ultimo bit forman la fila (0-3) y los 4 bits del medio
+            forman la columna (0-15) de la S-caja correspondiente; el valor encontrado
+            se convierte a 4 bits. Es la unica parte no lineal del algoritmo, y reduce
+            48 bits de vuelta a 32.</li>
+            <li><b>Permutacion (P):</b> una permutacion final mezcla esos 32 bits.</li>
+        </ol>
+    """) + rh.card("""
+        <p><b>Cifrado del bloque completo (64 bits):</b></p>
+        <ol>
+            <li><b>IP:</b> permutacion inicial del bloque (mensaje o cifrado).</li>
+            <li>Se parte en <code>L</code> (izquierda, 32 bits) y <code>R</code>
+            (derecha, 32 bits).</li>
+            <li>Por cada una de las 16 subclaves: <code>L_i = R_(i-1)</code> y
+            <code>R_i = L_(i-1) XOR f(R_(i-1), K_i)</code>. Esta es la estructura
+            Feistel.</li>
+            <li>Al terminar las 16 rondas se intercambian <code>L</code> y
+            <code>R</code> una ultima vez y se aplica <b>FP</b> (permutacion final,
+            inversa de IP).</li>
+        </ol>
+        <p class="section-note">Para <b>descifrar</b> se usa exactamente el mismo
+        proceso, pero con las 16 subclaves en <b>orden inverso</b>
+        (K16 &rarr; K1 en vez de K1 &rarr; K16). Por eso la estructura Feistel
+        permite cifrar y descifrar con el mismo circuito.</p>
+    """)
+    secciones.append(rh.section("&iquest;Como funciona el algoritmo DES?", contenido))
+
+    # -----------------------------------------------------------------
     # Datos de entrada
     # -----------------------------------------------------------------
     contenido = f"""
