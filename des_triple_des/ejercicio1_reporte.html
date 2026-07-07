@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ejercicio 1 &mdash; DES: cifrado y generacion de subclaves</title>
+<style>
+:root {
+    --bg: #0f1420;
+    --panel: #161d2e;
+    --border: #2a3450;
+    --text: #e7ebf3;
+    --muted: #9aa5bd;
+    --accent: #5fb3ff;
+    --accent2: #7ee0a8;
+    --accent3: #ffb454;
+    --mono-bg: #0b101c;
+}
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg: #f4f6fb;
+        --panel: #ffffff;
+        --border: #dbe1ee;
+        --text: #1b2230;
+        --muted: #566079;
+        --accent: #1266d1;
+        --accent2: #1a8a53;
+        --accent3: #b56a00;
+        --mono-bg: #eef1f7;
+    }
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    padding: 2rem 1.2rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+}
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 {
+    font-size: 1.6rem;
+    margin-bottom: .1rem;
+}
+h2 {
+    font-size: 1.15rem;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .4rem;
+    margin-top: 2.4rem;
+}
+.subtitle { color: var(--muted); margin-top: 0; margin-bottom: 2rem; }
+.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    margin: 1rem 0;
+}
+.mono {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    background: var(--mono-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: .55rem .7rem;
+    word-break: break-all;
+    font-size: .82rem;
+    display: block;
+    margin: .3rem 0;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: .85rem;
+    margin: .6rem 0 1.2rem;
+    overflow-x: auto;
+    display: block;
+}
+thead { display: table-header-group; }
+tbody { display: table-row-group; }
+tr { display: table-row; }
+th, td { display: table-cell; }
+th, td {
+    border: 1px solid var(--border);
+    padding: .45rem .6rem;
+    text-align: left;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    white-space: nowrap;
+}
+th { background: var(--mono-bg); color: var(--muted); font-family: inherit; }
+tr:nth-child(even) td { background: rgba(127,127,127,.06); }
+.badge {
+    display: inline-block;
+    padding: .15rem .55rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+.badge.ok { background: rgba(126,224,168,.18); color: var(--accent2); }
+.grid8 {
+    border-collapse: collapse;
+    margin: .6rem 0;
+    width: auto;
+}
+.grid8 td {
+    width: 34px; height: 34px;
+    text-align: center;
+    font-weight: 700;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    background: var(--mono-bg);
+    white-space: normal;
+}
+.flow { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+.flow .box {
+    background: var(--mono-bg);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: .5rem .8rem;
+    font-family: monospace;
+    font-size: .85rem;
+    text-align: center;
+}
+.flow .op {
+    color: var(--muted);
+    font-size: 1.1rem;
+}
+.section-note { color: var(--muted); font-size: .88rem; }
+svg { max-width: 100%; height: auto; display: block; margin: .6rem auto; }
+.toc { color: var(--muted); font-size: .9rem; }
+.toc a { color: var(--accent); text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+footer { color: var(--muted); font-size: .8rem; margin-top: 3rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Ejercicio 1 &mdash; DES: cifrado y generacion de subclaves</h1>
+<p class="subtitle">Actividad DES y Triple DES &mdash; proceso completo hasta las 16 subclaves y cifrado del mensaje.</p>
+<h2>1. Datos de entrada</h2>
+
+
+    <div class="card">
+        <p><b>Mensaje (M)</b> &mdash; matriz 8x8 tal como aparece en el PDF:</p>
+        <table class="grid8"><tr><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td></tr><tr><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td></tr><tr><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td></tr></table>
+        <p><b>M en binario:</b></p><span class="mono">1110110111001100001111001011100111111111001100110000111111101010</span>
+        <p><b>M en hexadecimal:</b></p><span class="mono">EDCC3CB9FF330FEA</span>
+    </div>
+    <div class="card">
+        <p><b>Clave (K)</b> &mdash; matriz 8x8 tal como aparece en el PDF:</p>
+        <table class="grid8"><tr><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td></tr><tr><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td></tr><tr><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td></tr></table>
+        <p><b>K en binario:</b></p><span class="mono">0001001100110100010101110111100110011011101111001101111111110001</span>
+        <p><b>K en hexadecimal:</b></p><span class="mono">133457799BBCDFF1</span>
+    </div>
+    
+<h2>2. PC-1 y division en C0 / D0</h2>
+
+<div class="card">
+        <p><b>K+ = PC-1(K)</b> (64 &rarr; 56 bits):</p><span class="mono">11110000110011001010101011110101010101100110011110001111</span>
+        <div class="flow"><div class="box">K (64 bits)</div><span class="op">&#8594;</span><div class="box">PC-1</div><span class="op">&#8594;</span><div class="box">K+ (56 bits)</div></div>
+        <p><b>C0</b> (primeros 28 bits):</p><span class="mono">1111000011001100101010101111</span>
+        <p><b>D0</b> (ultimos 28 bits):</p><span class="mono">0101010101100110011110001111</span>
+    </div>
+<h2>3. Generacion de las 16 subclaves (rotaciones + PC-2)</h2>
+
+<div class="card">
+        <p>Cada ronda rota <code>C</code> y <code>D</code> a la izquierda segun la tabla de
+        desplazamientos <code>[1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1]</code> y aplica <code>PC-2</code>
+        (56&rarr;48 bits) sobre <code>C_i + D_i</code> para obtener <code>K_i</code>.</p>
+        <table><thead><tr><th>Ronda</th><th>Desplazamiento</th><th>C_i (28 bits)</th><th>D_i (28 bits)</th></tr></thead><tbody><tr><td>1</td><td>1</td><td><span class="mono">1110000110011001010101011111</span></td><td><span class="mono">1010101011001100111100011110</span></td></tr><tr><td>2</td><td>1</td><td><span class="mono">1100001100110010101010111111</span></td><td><span class="mono">0101010110011001111000111101</span></td></tr><tr><td>3</td><td>2</td><td><span class="mono">0000110011001010101011111111</span></td><td><span class="mono">0101011001100111100011110101</span></td></tr><tr><td>4</td><td>2</td><td><span class="mono">0011001100101010101111111100</span></td><td><span class="mono">0101100110011110001111010101</span></td></tr><tr><td>5</td><td>2</td><td><span class="mono">1100110010101010111111110000</span></td><td><span class="mono">0110011001111000111101010101</span></td></tr><tr><td>6</td><td>2</td><td><span class="mono">0011001010101011111111000011</span></td><td><span class="mono">1001100111100011110101010101</span></td></tr><tr><td>7</td><td>2</td><td><span class="mono">1100101010101111111100001100</span></td><td><span class="mono">0110011110001111010101010110</span></td></tr><tr><td>8</td><td>2</td><td><span class="mono">0010101010111111110000110011</span></td><td><span class="mono">1001111000111101010101011001</span></td></tr><tr><td>9</td><td>1</td><td><span class="mono">0101010101111111100001100110</span></td><td><span class="mono">0011110001111010101010110011</span></td></tr><tr><td>10</td><td>2</td><td><span class="mono">0101010111111110000110011001</span></td><td><span class="mono">1111000111101010101011001100</span></td></tr><tr><td>11</td><td>2</td><td><span class="mono">0101011111111000011001100101</span></td><td><span class="mono">1100011110101010101100110011</span></td></tr><tr><td>12</td><td>2</td><td><span class="mono">0101111111100001100110010101</span></td><td><span class="mono">0001111010101010110011001111</span></td></tr><tr><td>13</td><td>2</td><td><span class="mono">0111111110000110011001010101</span></td><td><span class="mono">0111101010101011001100111100</span></td></tr><tr><td>14</td><td>2</td><td><span class="mono">1111111000011001100101010101</span></td><td><span class="mono">1110101010101100110011110001</span></td></tr><tr><td>15</td><td>2</td><td><span class="mono">1111100001100110010101010111</span></td><td><span class="mono">1010101010110011001111000111</span></td></tr><tr><td>16</td><td>1</td><td><span class="mono">1111000011001100101010101111</span></td><td><span class="mono">0101010101100110011110001111</span></td></tr></tbody></table>
+    </div><div class="card"><p><b>Subclaves generadas K1..K16:</b></p><table><thead><tr><th>Subclave</th><th>Binario (48 bits)</th><th>Hex</th></tr></thead><tbody><tr><td>K1</td><td><span class="mono">000110110000001011101111111111000111000001110010</span></td><td>1B02EFFC7072</td></tr><tr><td>K2</td><td><span class="mono">011110011010111011011001110110111100100111100101</span></td><td>79AED9DBC9E5</td></tr><tr><td>K3</td><td><span class="mono">010101011111110010001010010000101100111110011001</span></td><td>55FC8A42CF99</td></tr><tr><td>K4</td><td><span class="mono">011100101010110111010110110110110011010100011101</span></td><td>72ADD6DB351D</td></tr><tr><td>K5</td><td><span class="mono">011111001110110000000111111010110101001110101000</span></td><td>7CEC07EB53A8</td></tr><tr><td>K6</td><td><span class="mono">011000111010010100111110010100000111101100101111</span></td><td>63A53E507B2F</td></tr><tr><td>K7</td><td><span class="mono">111011001000010010110111111101100001100010111100</span></td><td>EC84B7F618BC</td></tr><tr><td>K8</td><td><span class="mono">111101111000101000111010110000010011101111111011</span></td><td>F78A3AC13BFB</td></tr><tr><td>K9</td><td><span class="mono">111000001101101111101011111011011110011110000001</span></td><td>E0DBEBEDE781</td></tr><tr><td>K10</td><td><span class="mono">101100011111001101000111101110100100011001001111</span></td><td>B1F347BA464F</td></tr><tr><td>K11</td><td><span class="mono">001000010101111111010011110111101101001110000110</span></td><td>215FD3DED386</td></tr><tr><td>K12</td><td><span class="mono">011101010111000111110101100101000110011111101001</span></td><td>7571F59467E9</td></tr><tr><td>K13</td><td><span class="mono">100101111100010111010001111110101011101001000001</span></td><td>97C5D1FABA41</td></tr><tr><td>K14</td><td><span class="mono">010111110100001110110111111100101110011100111010</span></td><td>5F43B7F2E73A</td></tr><tr><td>K15</td><td><span class="mono">101111111001000110001101001111010011111100001010</span></td><td>BF918D3D3F0A</td></tr><tr><td>K16</td><td><span class="mono">110010110011110110001011000011100001011111110101</span></td><td>CB3D8B0E17F5</td></tr></tbody></table></div>
+<h2>4. Cifrado del mensaje (DES completo, 16 rondas)</h2>
+
+<div class="card">
+        <p><b>Esquema de una ronda Feistel</b> (se aplica 16 veces con K1..K16):</p>
+        
+<svg viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Esquema de una ronda Feistel">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.6" font-family="monospace" font-size="14">
+    <text x="130" y="24" text-anchor="middle" fill="currentColor" stroke="none">L(i-1)</text>
+    <text x="440" y="24" text-anchor="middle" fill="currentColor" stroke="none">R(i-1)</text>
+
+    <line x1="130" y1="34" x2="130" y2="250" marker-end="url(#arrow)"/>
+    <line x1="440" y1="34" x2="440" y2="90" marker-end="url(#arrow)"/>
+    <line x1="440" y1="34" x2="440" y2="270" marker-end="url(#arrow)"/>
+
+    <line x1="440" y1="90" x2="470" y2="90"/>
+    <rect x="380" y="70" width="120" height="45" rx="6"/>
+    <text x="440" y="98" text-anchor="middle" fill="currentColor" stroke="none">f (R, Ki)</text>
+    <line x1="440" y1="115" x2="440" y2="150"/>
+
+    <line x1="500" y1="92" x2="560" y2="92" marker-end="url(#arrow)"/>
+    <text x="580" y="96" text-anchor="middle" fill="currentColor" stroke="none">Ki</text>
+
+    <circle cx="240" cy="150" r="18"/>
+    <text x="240" y="156" text-anchor="middle" fill="currentColor" stroke="none">XOR</text>
+    <line x1="148" y1="150" x2="222" y2="150" marker-end="url(#arrow)"/>
+    <line x1="410" y1="150" x2="258" y2="150" marker-end="url(#arrow)"/>
+
+    <line x1="240" y1="168" x2="240" y2="270" marker-end="url(#arrow)"/>
+
+    <text x="130" y="290" text-anchor="middle" fill="currentColor" stroke="none">L(i) = R(i-1)</text>
+    <text x="240" y="310" text-anchor="middle" fill="currentColor" stroke="none">R(i) = L(i-1) XOR f(R(i-1),Ki)</text>
+  </g>
+</svg>
+
+        <div class="flow"><div class="box">M</div><span class="op">&#8594;</span><div class="box">IP</div><span class="op">&#8594;</span><div class="box">L0 / R0</div><span class="op">&#8594;</span><div class="box">16 rondas</div><span class="op">&#8594;</span><div class="box">R16+L16</div><span class="op">&#8594;</span><div class="box">FP</div><span class="op">&#8594;</span><div class="box">C</div></div>
+        <p><b>IP(M):</b></p><span class="mono">1001001100111100010101110111100110011011101111011101111111110000</span>
+        <p><b>L0:</b></p><span class="mono">10010011001111000101011101111001</span>
+        <p><b>R0:</b></p><span class="mono">10011011101111011101111111110000</span>
+    </div><div class="card"><p><b>Valores por ronda:</b></p><table><thead><tr><th>Ronda</th><th>L_i (32 bits)</th><th>R_i (32 bits)</th></tr></thead><tbody><tr><td>1</td><td><span class="mono">10011011101111011101111111110000</span></td><td><span class="mono">11010011101010011011111000001100</span></td></tr><tr><td>2</td><td><span class="mono">11010011101010011011111000001100</span></td><td><span class="mono">11001100011000000100011101001011</span></td></tr><tr><td>3</td><td><span class="mono">11001100011000000100011101001011</span></td><td><span class="mono">10100110110111001110010000010001</span></td></tr><tr><td>4</td><td><span class="mono">10100110110111001110010000010001</span></td><td><span class="mono">11100011111101001000001100001101</span></td></tr><tr><td>5</td><td><span class="mono">11100011111101001000001100001101</span></td><td><span class="mono">01011001011000010011000001101001</span></td></tr><tr><td>6</td><td><span class="mono">01011001011000010011000001101001</span></td><td><span class="mono">10010110011001111000010101110111</span></td></tr><tr><td>7</td><td><span class="mono">10010110011001111000010101110111</span></td><td><span class="mono">10111000111001011100101101010000</span></td></tr><tr><td>8</td><td><span class="mono">10111000111001011100101101010000</span></td><td><span class="mono">01010100011010110100001100101010</span></td></tr><tr><td>9</td><td><span class="mono">01010100011010110100001100101010</span></td><td><span class="mono">11101000000011100100111101111100</span></td></tr><tr><td>10</td><td><span class="mono">11101000000011100100111101111100</span></td><td><span class="mono">00101000001001101110101011010101</span></td></tr><tr><td>11</td><td><span class="mono">00101000001001101110101011010101</span></td><td><span class="mono">01000111010010010111111100001111</span></td></tr><tr><td>12</td><td><span class="mono">01000111010010010111111100001111</span></td><td><span class="mono">01101001011001101101110001000111</span></td></tr><tr><td>13</td><td><span class="mono">01101001011001101101110001000111</span></td><td><span class="mono">01000010010111000000100100101111</span></td></tr><tr><td>14</td><td><span class="mono">01000010010111000000100100101111</span></td><td><span class="mono">11011001100100100011100001110100</span></td></tr><tr><td>15</td><td><span class="mono">11011001100100100011100001110100</span></td><td><span class="mono">00100000101000000110010111101000</span></td></tr><tr><td>16</td><td><span class="mono">00100000101000000110010111101000</span></td><td><span class="mono">01100001110010011010101000010010</span></td></tr></tbody></table></div><div class="card">
+        <p><b>Texto cifrado (binario):</b></p><span class="mono">0101100000000101000010000001011000000001111011100101101000110110</span>
+        <p><b>Texto cifrado (hex):</b></p><span class="mono">5805081601EE5A36</span>
+        <p><b>Verificacion:</b> al descifrar con la misma clave K se obtiene
+        <span class="badge ok">Mensaje original recuperado correctamente</span></p>
+        <p><b>Mensaje descifrado:</b></p><span class="mono">1110110111001100001111001011100111111111001100110000111111101010</span>
+    </div>
+<footer>Generado automaticamente por el script de Python de la actividad DES / Triple DES.</footer>
+</div>
+</body>
+</html>

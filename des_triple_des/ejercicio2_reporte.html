@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ejercicio 2 &mdash; Triple DES (3DES)</title>
+<style>
+:root {
+    --bg: #0f1420;
+    --panel: #161d2e;
+    --border: #2a3450;
+    --text: #e7ebf3;
+    --muted: #9aa5bd;
+    --accent: #5fb3ff;
+    --accent2: #7ee0a8;
+    --accent3: #ffb454;
+    --mono-bg: #0b101c;
+}
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg: #f4f6fb;
+        --panel: #ffffff;
+        --border: #dbe1ee;
+        --text: #1b2230;
+        --muted: #566079;
+        --accent: #1266d1;
+        --accent2: #1a8a53;
+        --accent3: #b56a00;
+        --mono-bg: #eef1f7;
+    }
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    padding: 2rem 1.2rem 4rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+}
+.wrap { max-width: 980px; margin: 0 auto; }
+h1 {
+    font-size: 1.6rem;
+    margin-bottom: .1rem;
+}
+h2 {
+    font-size: 1.15rem;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .4rem;
+    margin-top: 2.4rem;
+}
+.subtitle { color: var(--muted); margin-top: 0; margin-bottom: 2rem; }
+.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    margin: 1rem 0;
+}
+.mono {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    background: var(--mono-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: .55rem .7rem;
+    word-break: break-all;
+    font-size: .82rem;
+    display: block;
+    margin: .3rem 0;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: .85rem;
+    margin: .6rem 0 1.2rem;
+    overflow-x: auto;
+    display: block;
+}
+thead { display: table-header-group; }
+tbody { display: table-row-group; }
+tr { display: table-row; }
+th, td { display: table-cell; }
+th, td {
+    border: 1px solid var(--border);
+    padding: .45rem .6rem;
+    text-align: left;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    white-space: nowrap;
+}
+th { background: var(--mono-bg); color: var(--muted); font-family: inherit; }
+tr:nth-child(even) td { background: rgba(127,127,127,.06); }
+.badge {
+    display: inline-block;
+    padding: .15rem .55rem;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+.badge.ok { background: rgba(126,224,168,.18); color: var(--accent2); }
+.grid8 {
+    border-collapse: collapse;
+    margin: .6rem 0;
+    width: auto;
+}
+.grid8 td {
+    width: 34px; height: 34px;
+    text-align: center;
+    font-weight: 700;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    background: var(--mono-bg);
+    white-space: normal;
+}
+.flow { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+.flow .box {
+    background: var(--mono-bg);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: .5rem .8rem;
+    font-family: monospace;
+    font-size: .85rem;
+    text-align: center;
+}
+.flow .op {
+    color: var(--muted);
+    font-size: 1.1rem;
+}
+.section-note { color: var(--muted); font-size: .88rem; }
+svg { max-width: 100%; height: auto; display: block; margin: .6rem auto; }
+.toc { color: var(--muted); font-size: .9rem; }
+.toc a { color: var(--accent); text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+footer { color: var(--muted); font-size: .8rem; margin-top: 3rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Ejercicio 2 &mdash; Triple DES (3DES)</h1>
+<p class="subtitle">Actividad DES y Triple DES &mdash; cifrado y descifrado de un mensaje con 3DES (EDE, tres claves).</p>
+<h2>1. Claves y mensaje original</h2>
+
+<div class="card">
+        <p><b>K1</b> (misma clave K del ejercicio 1):</p><span class="mono">0001001100110100010101110111100110011011101111001101111111110001</span>
+        <p>hex: <span class="mono">133457799BBCDFF1</span></p>
+        <p><b>K2:</b></p><span class="mono">0101001100011011101001100111001011001101000111101011100101100011</span>
+        <p>hex: <span class="mono">531BA672CD1EB963</span></p>
+        <p><b>K3:</b></p><span class="mono">1100010110011100001101011101001101011010011110001000111100101010</span>
+        <p>hex: <span class="mono">C59C35D35A788F2A</span></p>
+    </div><div class="card">
+        <p><b>Mensaje original:</b></p><span class="mono">Actividad de DES y Triple DES - Criptologia</span>
+        <p><b>Bytes (hex):</b></p><span class="mono">41637469766964616420646520444553207920547269706c6520444553202d2043726970746f6c6f676961</span>
+    </div>
+<h2>2. Esquema 3DES (EDE)</h2>
+
+<div class="card">
+        <p>3DES en modo <b>EDE</b> (Encrypt-Decrypt-Encrypt) con tres claves independientes:</p>
+        
+<svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Esquema 3DES EDE">
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g font-family="monospace" font-size="13">
+    <text x="10" y="55" fill="currentColor">M</text>
+    <line x1="30" y1="50" x2="70" y2="50" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+    <rect x="75" y="25" width="140" height="50" rx="8" fill="none" stroke="currentColor"/>
+    <text x="145" y="45" text-anchor="middle" fill="currentColor">E ( K1 )</text>
+    <text x="145" y="16" text-anchor="middle" fill="currentColor" font-size="11">K1=133457799BBCDFF1</text>
+    <line x1="215" y1="50" x2="255" y2="50" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+    <rect x="260" y="25" width="140" height="50" rx="8" fill="none" stroke="currentColor"/>
+    <text x="330" y="45" text-anchor="middle" fill="currentColor">D ( K2 )</text>
+    <text x="330" y="16" text-anchor="middle" fill="currentColor" font-size="11">K2=531BA672CD1EB963</text>
+    <line x1="400" y1="50" x2="440" y2="50" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+    <rect x="445" y="25" width="140" height="50" rx="8" fill="none" stroke="currentColor"/>
+    <text x="515" y="45" text-anchor="middle" fill="currentColor">E ( K3 )</text>
+    <text x="515" y="16" text-anchor="middle" fill="currentColor" font-size="11">K3=C59C35D35A788F2A</text>
+    <line x1="585" y1="50" x2="625" y2="50" stroke="currentColor" marker-end="url(#arrow2)"/>
+    <text x="650" y="55" fill="currentColor">C  (cifrado)</text>
+
+    <text x="10" y="175" fill="currentColor">C</text>
+    <line x1="30" y1="170" x2="70" y2="170" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+    <rect x="75" y="145" width="140" height="50" rx="8" fill="none" stroke="currentColor"/>
+    <text x="145" y="165" text-anchor="middle" fill="currentColor">D ( K3 )</text>
+    <line x1="215" y1="170" x2="255" y2="170" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+    <rect x="260" y="145" width="140" height="50" rx="8" fill="none" stroke="currentColor"/>
+    <text x="330" y="165" text-anchor="middle" fill="currentColor">E ( K2 )</text>
+    <line x1="400" y1="170" x2="440" y2="170" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+    <rect x="445" y="145" width="140" height="50" rx="8" fill="none" stroke="currentColor"/>
+    <text x="515" y="165" text-anchor="middle" fill="currentColor">D ( K1 )</text>
+    <line x1="585" y1="170" x2="625" y2="170" stroke="currentColor" marker-end="url(#arrow2)"/>
+    <text x="650" y="175" fill="currentColor">M  (recuperado)</text>
+
+    <text x="75" y="230" fill="currentColor" font-size="12">Cifrado:    C = E(K3, D(K2, E(K1, M)))</text>
+    <text x="75" y="250" fill="currentColor" font-size="12">Descifrado: M = D(K1, E(K2, D(K3, C)))</text>
+  </g>
+</svg>
+
+        <p class="section-note">El mensaje se convierte a bytes UTF-8, se rellena con PKCS7 hasta
+        ser multiplo de 8 bytes y se procesa bloque a bloque (64 bits) en modo ECB.</p>
+    </div>
+<h2>3. Proceso de cifrado, bloque a bloque</h2>
+
+<div class="card"><table><thead><tr><th>Bloque</th><th>Texto plano (hex)</th><th>E(K1,.)</th><th>D(K2,.)</th><th>E(K3,.) = cifrado</th></tr></thead><tbody><tr><td>1</td><td>4163746976696461</td><td>EC219532337193F7</td><td>BFF029648FA28317</td><td>E3BDFE742AF922E0</td></tr><tr><td>2</td><td>6420646520444553</td><td>568F5683FF2FED73</td><td>66A624D364BF955F</td><td>9250F1DF7B36C62C</td></tr><tr><td>3</td><td>207920547269706C</td><td>83ECC6D144F6C8B9</td><td>F93093977236A23D</td><td>38D1A61C497AD99D</td></tr><tr><td>4</td><td>6520444553202D20</td><td>A943AA6F77BC7144</td><td>D5C158965463F16E</td><td>03BC5B3AA1D37A92</td></tr><tr><td>5</td><td>43726970746F6C6F</td><td>81065AE1A8385790</td><td>6A6098B5871B20E1</td><td>9DE2F2F05AFFCCE7</td></tr><tr><td>6</td><td>6769610505050505</td><td>D219A58693256877</td><td>A014C05B5C2BD743</td><td>A95B5182A676EDE9</td></tr></tbody></table></div><div class="card">
+        <p><b>Texto cifrado completo (hex):</b></p><span class="mono">e3bdfe742af922e09250f1df7b36c62c38d1a61c497ad99d03bc5b3aa1d37a929de2f2f05affcce7a95b5182a676ede9</span>
+    </div>
+<h2>4. Proceso de descifrado, bloque a bloque</h2>
+
+<div class="card"><table><thead><tr><th>Bloque</th><th>Cifrado (hex)</th><th>D(K3,.)</th><th>E(K2,.)</th><th>D(K1,.) = texto plano</th></tr></thead><tbody><tr><td>1</td><td>E3BDFE742AF922E0</td><td>BFF029648FA28317</td><td>EC219532337193F7</td><td>4163746976696461</td></tr><tr><td>2</td><td>9250F1DF7B36C62C</td><td>66A624D364BF955F</td><td>568F5683FF2FED73</td><td>6420646520444553</td></tr><tr><td>3</td><td>38D1A61C497AD99D</td><td>F93093977236A23D</td><td>83ECC6D144F6C8B9</td><td>207920547269706C</td></tr><tr><td>4</td><td>03BC5B3AA1D37A92</td><td>D5C158965463F16E</td><td>A943AA6F77BC7144</td><td>6520444553202D20</td></tr><tr><td>5</td><td>9DE2F2F05AFFCCE7</td><td>6A6098B5871B20E1</td><td>81065AE1A8385790</td><td>43726970746F6C6F</td></tr><tr><td>6</td><td>A95B5182A676EDE9</td><td>A014C05B5C2BD743</td><td>D219A58693256877</td><td>6769610505050505</td></tr></tbody></table></div><div class="card">
+        <p><b>Texto recuperado:</b></p><span class="mono">Actividad de DES y Triple DES - Criptologia</span>
+        <p><b>Verificacion:</b>
+        <span class="badge ok">Coincide con el mensaje original</span></p>
+    </div>
+<footer>Generado automaticamente por el script de Python de la actividad DES / Triple DES.</footer>
+</div>
+</body>
+</html>

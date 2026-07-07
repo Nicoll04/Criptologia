@@ -5,18 +5,27 @@ Implementación en Python (sin librerías externas de criptografía) de:
 1. **`des.py`** — motor DES completo: tablas oficiales (IP, FP, E, P, PC-1, PC-2,
    S-Cajas), generación de las 16 subclaves y cifrado/descifrado de un bloque
    de 64 bits.
-2. **`ejercicio1_des_subclaves.py`** — Punto 1: cifra el mensaje del PDF con la
-   clave K dada y muestra todo el proceso hasta generar las 16 subclaves.
-3. **`ejercicio2_3des.py`** — Punto 2: implementación de 3DES (EDE, tres claves)
-   que cifra y descifra un mensaje de texto, mostrando el procedimiento
-   bloque a bloque.
+2. **`reporte_html.py`** — utilidades para construir el reporte visual (tablas
+   y diagramas SVG) que generan los dos ejercicios.
+3. **`ejercicio1_des_subclaves.py`** — Punto 1: cifra el mensaje del PDF con la
+   clave K dada y genera un reporte HTML (`ejercicio1_reporte.html`) con todo
+   el proceso hasta generar las 16 subclaves.
+4. **`ejercicio2_3des.py`** — Punto 2: implementación de 3DES (EDE, tres claves)
+   que cifra y descifra un mensaje de texto, generando un reporte HTML
+   (`ejercicio2_reporte.html`) con el procedimiento bloque a bloque.
 
-Requiere solo Python 3 (sin dependencias).
+Requiere solo Python 3 (sin dependencias). Los scripts **no imprimen el
+proceso en la consola**: generan un archivo HTML autocontenido (tablas +
+diagramas SVG) y lo abren automáticamente en el navegador por defecto.
 
 ```bash
-python3 ejercicio1_des_subclaves.py
-python3 ejercicio2_3des.py
+python3 ejercicio1_des_subclaves.py   # genera y abre ejercicio1_reporte.html
+python3 ejercicio2_3des.py            # genera y abre ejercicio2_reporte.html
 ```
+
+Si el navegador no se abre automáticamente (por ejemplo, en un entorno sin
+interfaz gráfica), abre manualmente el archivo `.html` generado con doble
+clic o arrastrándolo a cualquier navegador.
 
 ## Punto 1 — DES: mensaje, clave y generación de subclaves
 
