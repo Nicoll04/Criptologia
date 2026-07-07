@@ -180,8 +180,6 @@ def main():
     tabla_rondas = rh.table(["Ronda", "L_i (32 bits)", "R_i (32 bits)"], filas_rondas)
 
     cifrado = des.permute(R + L, des.FP)
-    descifrado = des.decrypt_block(cifrado, CLAVE_BITS)
-    ok = descifrado == MENSAJE_BITS
 
     contenido = rh.card(f"""
         <p><b>Esquema de una ronda Feistel</b> (se aplica 16 veces con K1..K16):</p>
@@ -193,9 +191,6 @@ def main():
     """) + rh.card(f"<p><b>Valores por ronda:</b></p>{tabla_rondas}") + rh.card(f"""
         <p><b>Texto cifrado (binario):</b></p>{rh.mono(cifrado)}
         <p><b>Texto cifrado (hex):</b></p>{rh.mono(des.bits_to_hex(cifrado))}
-        <p><b>Verificacion:</b> al descifrar con la misma clave K se obtiene
-        {rh.badge_ok('Mensaje original recuperado correctamente' if ok else 'ERROR: no coincide', ok)}</p>
-        <p><b>Mensaje descifrado:</b></p>{rh.mono(descifrado)}
     """)
     secciones.append(rh.section("4. Cifrado del mensaje (DES completo, 16 rondas)", contenido))
 
