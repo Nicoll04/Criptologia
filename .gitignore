@@ -1,1 +1,7 @@
 __pycache__/
+
+# generador-horarios
+node_modules/
+dist/
+generador-horarios/server/data/db.json
+
